@@ -1,0 +1,9 @@
+/acme.sh/*
+# !/acme.sh
+# /.env
+
+/conf.d/*
+!/conf.d/default.conf
+!/conf.d/*.template
+
+/log/*
