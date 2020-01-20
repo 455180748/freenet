@@ -7,3 +7,5 @@
 !/conf.d/*.template
 
 /log/*
+
+!.gitignore
