@@ -5,7 +5,7 @@ services:
         image: neilpang/acme.sh:latest
         container_name: acme.sh
         volumes:
-            - ./acme.sh:/acme.sh
+            - acme-data:/acme.sh
             - ./html:/html
             - ssl-data:/ssl
             - /var/run/docker.sock:/var/run/docker.sock 
@@ -24,7 +24,7 @@ services:
                 /entry.sh daemon
         environment:
             - DEPLOY_DOCKER_CONTAINER_LABEL=ssl_nginx
-            - DEPLOY_DOCKER_CONTAINER_RELOAD_CMD="nginx -s reload"
+            - DEPLOY_DOCKER_CONTAINER_RELOAD_CMD="envsubst '$$NGINX_HOST' < /etc/nginx/conf.d/shadowsocks.template > /etc/nginx/conf.d/shadowsocks.conf && nginx -s reload"
         restart: always
 
 
@@ -57,10 +57,9 @@ services:
             - ssl_nginx
         environment:
             - NGINX_HOST=${DOMAIN}
-        command: 
-            /bin/sh -c "envsubst '$$NGINX_HOST' < /etc/nginx/conf.d/shadowsocks.template > /etc/nginx/conf.d/shadowsocks.conf && exec nginx -g 'daemon off;'"
         restart: always
 
     
 volumes:
+    acme-data:
     ssl-data:
