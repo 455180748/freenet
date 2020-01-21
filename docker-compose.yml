@@ -4,6 +4,8 @@ services:
     acme.sh:
         image: neilpang/acme.sh:latest
         container_name: acme.sh
+        depends_on: 
+            - nginx
         volumes:
             - acme-data:/acme.sh
             - ./html:/html
@@ -43,8 +45,6 @@ services:
     nginx:
         image: nginx:stable-alpine
         container_name: nginx
-        depends_on:
-            - acme.sh
         ports:
             - 80:80
             - 443:443
