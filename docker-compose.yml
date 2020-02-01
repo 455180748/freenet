@@ -1,47 +1,6 @@
 version: '3'
 
 services:
-    acme.sh:
-        image: neilpang/acme.sh:latest
-        container_name: acme.sh
-        depends_on: 
-            - nginx
-        volumes:
-            - acme-data:/acme.sh
-            - ./html:/html
-            - ssl-data:/ssl
-            - /var/run/docker.sock:/var/run/docker.sock 
-        command:
-            - /bin/sh
-            - -c
-            - |
-                acme.sh --issue -d ${DOMAIN} -w /html
-                acme.sh --installcert -d ${DOMAIN} \
-                    --key-file /ssl/key.pem \
-                    --cert-file /ssl/cert.pem \
-                    --ca-file /ssl/ca.pem \
-                    --fullchain-file /ssl/full.pem
-                acme.sh --deploy -d ${DOMAIN} \
-                    --deploy-hook docker
-                /entry.sh daemon
-        environment:
-            - DEPLOY_DOCKER_CONTAINER_LABEL=ssl_nginx
-            - DEPLOY_DOCKER_CONTAINER_RELOAD_CMD="envsubst '$$NGINX_HOST' < /etc/nginx/conf.d/shadowsocks.template > /etc/nginx/conf.d/shadowsocks.conf && nginx -s reload"
-        restart: always
-
-
-
-    shadowsocks:
-        image: 455180748/ss-with-v2ray:latest
-        container_name: ss-with-r2ray
-        # networks:
-        #     - nginx-proxy
-        environment:
-            - PASSWORD=${PASSWORD}
-            - ARGS=--plugin v2ray-plugin --plugin-opts server;path=/freenet
-        restart: always
-
-
     nginx:
         image: nginx:stable-alpine
         container_name: nginx
@@ -49,17 +8,45 @@ services:
             - 80:80
             - 443:443
         volumes:
-            - ssl-data:/etc/nginx/ssl
             - ./html:/usr/share/nginx/html
-            - ./conf.d:/etc/nginx/conf.d
-            - ./log:/var/log/nginx
+            - ./template:/etc/nginx/template
+        environment:
+            DOMAIN: ${DOMAIN}
         labels:
             - ssl_nginx
-        environment:
-            - NGINX_HOST=${DOMAIN}
         restart: always
 
-    
+    acme.sh:
+        image: neilpang/acme.sh:latest
+        container_name: acme.sh
+        depends_on:
+            - nginx
+        volumes:
+            - ./entry.sh:/entry.sh
+            - acme-data:/acme.sh
+            - ./html:/html
+            - /var/run/docker.sock:/var/run/docker.sock 
+            - ./conf.d:/conf.d
+        command:
+            ['daemon']
+        environment:
+            - DOMAIN=${DOMAIN}
+            - DEPLOY_DOCKER_CONTAINER_LABEL=ssl_nginx
+            - DEPLOY_DOCKER_CONTAINER_KEY_FILE=/etc/nginx/ssl/${DOMAIN}.key
+            - DEPLOY_DOCKER_CONTAINER_FULLCHAIN_FILE=/etc/nginx/ssl/${DOMAIN}.fullchain
+            - DEPLOY_DOCKER_CONTAINER_RELOAD_CMD="envsubst '\$$DOMAIN' < /etc/nginx/template/shadowsocks.template > /etc/nginx/conf.d/shadowsocks.conf && nginx -s reload"
+        restart: always
+
+
+
+    shadowsocks:
+        image: 455180748/ss-with-v2ray:latest
+        container_name: ss-with-v2ray
+        environment:
+            PLUGIN_OPT: server;loglevel=error
+            PASSWORD: ${PASSWORD}
+        restart: always
+
+
 volumes:
     acme-data:
-    ssl-data:
