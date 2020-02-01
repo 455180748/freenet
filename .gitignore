@@ -1,7 +1,0 @@
-/conf.d/*
-!/conf.d/default.conf
-!/conf.d/*.template
-
-/log/*
-
-!.gitignore
