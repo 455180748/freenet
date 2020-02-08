@@ -12,3 +12,4 @@ if [ "$1" = "daemon" ];  then
     crond && while true; do sleep 1; done;
 else
     exec -- "$@"
+fi
