@@ -25,8 +25,7 @@ services:
             - ./entry.sh:/entry.sh
             - acme-data:/acme.sh
             - ./html:/html
-            - /var/run/docker.sock:/var/run/docker.sock 
-            - ./conf.d:/conf.d
+            - /var/run/docker.sock:/var/run/docker.sock
         command:
             ['daemon']
         environment:
