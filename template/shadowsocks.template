@@ -15,17 +15,11 @@ server {
         root /usr/share/nginx/html;
         index index.html;
     }
-    location /freenet {
-        proxy_redirect off;
+    location /freenet {        
         proxy_http_version 1.1;
         proxy_pass http://shadowsocks-libev/;     # Port of v2ray-plugin
         proxy_set_header Host $http_host;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
     }
-}
-server {
-    listen 80;
-    server_name $DOMAIN;
-    return  301 https://$host$request_uri;
 }

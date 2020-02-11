@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 if [ $DOMAIN ]; then
-    acme.sh --issue -d $DOMAIN --webroot /html
+    acme.sh --issue -d $DOMAIN --standalone
     acme.sh --deploy -d $DOMAIN --deploy-hook docker
 else
     echo there is no domain
